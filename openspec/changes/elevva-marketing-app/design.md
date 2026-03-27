@@ -20,3 +20,18 @@ Se as instâncias de API processassem vídeos de 500MB em streaming, o custo de 
 2. FastAPI gera uma **Pre-Signed URL** (Token efêmero assinado secretamente) via infraestrutura (AWS S3) e devolve.
 3. Front-end injeta o arquivo binário num método `PUT` **diretamente* ao Bucket S3, isolado do Backend.
 4. FastAPI guarda apenas o link em banco.
+
+## 4. Segurança Camada Zero
+Este projeto enforça rigidamente protocolos base de Segurança da Informação:
+- Senhas MUST usar `Bcrypt` com salting iterativo dinâmico.
+- Sessões MUST usar JWT (JSON Web Tokens) devidamente assinado.
+- Uploads de vídeos (500MB) MUST usar Pre-Signed URLs nativas, engessando o bypass completo da API.
+- O Isolamento de Dados B2B (Multi-tenancy) MUST impedir que um cliente corporativo acesse o board de outro.
+
+## 5. Persistência Fixada (PostgreSQL + SQLAlchemy 2.0)
+O banco de dados relacional MUST sustentar os 4 CRUDs essenciais. As Chaves Primárias MUST gerar um UUID v4 de identificação universal para inviabilizar listagem sequencial:
+- Tabela `users`: name, email `UNIQUE`, password_hash (`Bcrypt`), role (`AGENCY/CLIENT`).
+- Tabela `calendars`: Gerencia grupamentos temporais.
+- Tabela `posts`: Componentes do Kanban B2B.
+- Tabela `ideas`: Inbox colaborativo.
+- Tabela `comments` (Pin Visual): Feedback com `coord_x` e `coord_y`.
