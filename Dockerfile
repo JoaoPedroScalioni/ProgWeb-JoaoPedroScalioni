@@ -2,8 +2,8 @@
 FROM python:3.12-slim
 
 # 2. Configurações para o Python não gerar arquivos inúteis (.pyc) e exibir logs em tempo real
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # 3. Define a pasta de trabalho dentro do contêiner
 WORKDIR /app
