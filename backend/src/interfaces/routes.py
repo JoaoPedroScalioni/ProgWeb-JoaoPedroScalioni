@@ -13,11 +13,12 @@ from backend.presentation.schemas import (
     UploadIntentRequest,
     UploadIntentResponse
 )
-from backend.infrastructure.database import get_db
-from backend.infrastructure.models import PostModel, CommentModel, UserModel
+from backend.src.infrastructure.database import get_db
+from backend.src.infrastructure.models import PostModel, CommentModel, UserModel
 from backend.infrastructure.s3_service import S3CloudService
 from backend.domain.entities import PostStatus
 from backend.presentation.auth import get_current_user
+from backend.src.application.use_cases import GetPostDetailUseCase, AddCommentUseCase
 
 router = APIRouter(prefix="/posts", tags=["Kanban Posts B2B"])
 
@@ -70,15 +71,10 @@ async def create_post(
 @router.get("/{post_id}", response_model=PostDetailResponse)
 async def get_post(post_id: UUID, db: AsyncSession = Depends(get_db)):
     """
-    Obtém a mídia em união relacional 'Eager' com seus Pins Visuais de feedback.
+    Obtém a mídia delegando ao Caso de Uso (Application Layer)
     """
-    # Await nativo: Liberar a Thread do Python enquanto busca os dados
-    result = await db.execute(
-        select(PostModel)
-        .options(selectinload(PostModel.comments))
-        .where(PostModel.id == post_id)
-    )
-    post = result.scalars().first()
+    use_case = GetPostDetailUseCase(db)
+    post = await use_case.execute(post_id)
     
     if not post:
         raise HTTPException(status_code=404, detail="Regra Domain: Postagem inválida ou apagada pelo Tenant B2B.")
@@ -92,7 +88,7 @@ async def add_visual_pin_comment(
     current_user: UserModel = Depends(get_current_user)
 ):
     """
-    Registra fisicamente o Pin Visual.
+    Registra fisicamente o Pin Visual via Caso de Uso.
     O Pydantic (Schema) garantirá silenciosamente que coord_x e coord_y nunca saiam de 0% a 100%.
     """
     # Valida se a mídia mãe (post) existe
@@ -100,7 +96,8 @@ async def add_visual_pin_comment(
     if not post_result.scalars().first():
         raise HTTPException(status_code=404, detail="Não é possível transfixar Pin. Post não localizado.")
         
-    new_comment = CommentModel(
+    use_case = AddCommentUseCase(db)
+    new_comment = await use_case.execute(
         post_id=post_id,
         user_id=request.user_id,
         content=request.content,
@@ -108,7 +105,4 @@ async def add_visual_pin_comment(
         coord_y=request.coord_y
     )
     
-    db.add(new_comment)
-    await db.commit()
-    await db.refresh(new_comment)
     return new_comment
