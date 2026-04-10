@@ -3,10 +3,10 @@ from fastapi.testclient import TestClient
 from fastapi import FastAPI
 from uuid import uuid4
 
-from backend.presentation.routes import router, get_approve_use_case
-from backend.application.use_cases import ApprovePostUseCase
+from backend.src.interfaces.routes import router
+# from backend.src.application.use_cases import ApprovePostUseCase 
 from backend.tests.application.test_use_cases import MockPostRepository
-from backend.domain.entities import Post, PostStatus
+from backend.src.domain.entities import Post, PostStatus
 
 # ===============================================
 # Configuração do Ambiente TestClient (TDD Contrato)
@@ -17,8 +17,12 @@ app.include_router(router)
 # Massa de dados injetada in-memory
 repo = MockPostRepository()
 target_post_id = uuid4()
-post = Post(id=target_post_id, calendar_id=uuid4(), media_url="b2b_ad.mp4")
-post.status = PostStatus.AGUARDANDO_APROVACAO
+post = Post(
+    id=target_post_id, 
+    calendar_id=uuid4(), 
+    media_url="b2b_ad.mp4",
+    status=PostStatus.AGUARDANDO_APROVACAO
+)
 repo.save(post)
 
 # Overriding as dependências web do FastAPI pelos Mock do TDD Fase 3

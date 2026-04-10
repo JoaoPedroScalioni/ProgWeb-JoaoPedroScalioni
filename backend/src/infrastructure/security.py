@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from jose import jwt, JWTError
-from backend.infrastructure.config import settings
+from backend.src.infrastructure.config import settings
 
 # Configuração de Hashing exigida na Seguraça de Camada Zero
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str
     S3_BUCKET_NAME: str
     AWS_REGION: str = "sa-east-1"
+    TIMEZONE: str = "America/Sao_Paulo"
     
     # Tolerância a variáveis extras e vínculo absoluto via .env do Docker CWD
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")

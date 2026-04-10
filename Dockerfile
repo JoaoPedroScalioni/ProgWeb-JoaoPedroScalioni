@@ -12,7 +12,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
+
+# 5. Configura o Timezone no nível do sistema
+ENV TZ=America/Sao_Paulo
 
 # 5. Copia o arquivo de dependências e instala as bibliotecas
 COPY requirements.txt .

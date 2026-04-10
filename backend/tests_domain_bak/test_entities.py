@@ -1,6 +1,6 @@
 import pytest
 from uuid import UUID, uuid4
-from backend.domain.entities import User, Post, Coordinate, UserRole, PostStatus
+from backend.src.domain.entities import User, Post, Coordinate, UserRole, PostStatus
 
 # Fase RED: O teste foi idealizado exigindo comportamentos que não existiam.
 # Fase GREEN: Agora eles passam contra as dataclasses puras.
@@ -35,7 +35,7 @@ def test_post_creation_must_default_to_criado_status():
 
 def test_comment_pin_visual_creation():
     """QA Smoke Test: Valida 100% de Cobertura para a inserção de Pins Visuais no Kanban"""
-    from backend.domain.entities import Comment
+    from backend.src.domain.entities import Comment
     coord = Coordinate(x=10.5, y=50.2)
     comment = Comment(
         post_id=uuid4(),

@@ -11,3 +11,7 @@ passlib[bcrypt]==1.7.4
 bcrypt==3.1.7
 python-jose[cryptography]
 python-multipart
+pytest-cov
+httpx
+pytest-asyncio
+pytz

@@ -1,9 +1,9 @@
-from sqlalchemy import Column, String, Float, Enum, ForeignKey
+from sqlalchemy import Column, String, Float, Enum, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs
 import uuid
-from backend.domain.entities import UserRole, PostStatus
+from backend.src.domain.entities import UserRole, PostStatus
 
 # Clean Architecture: Herança obrigatória da classe AsyncAttrs para compatibilidade Async/Await do FastAPI
 Base = declarative_base(cls=AsyncAttrs)
@@ -15,6 +15,7 @@ class UserModel(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False)
+    created_at = Column(DateTime, nullable=True)
 
 class CalendarModel(Base):
     __tablename__ = "calendars"
@@ -28,6 +29,7 @@ class PostModel(Base):
     calendar_id = Column(PGUUID(as_uuid=True), ForeignKey("calendars.id"))
     media_url = Column(String, nullable=False)
     status = Column(Enum(PostStatus), default=PostStatus.CRIADO)
+    created_at = Column(DateTime, nullable=True)
     
     # Eager Loading para puxar os Pins Visuais atrelados ao carregar a mídia
     comments = relationship("CommentModel", back_populates="post", cascade="all, delete-orphan")
@@ -50,5 +52,6 @@ class CommentModel(Base):
     # Restrição Visual no PostgreSQL - Flutuantes
     coord_x = Column(Float, nullable=True)
     coord_y = Column(Float, nullable=True)
+    created_at = Column(DateTime, nullable=True)
     
     post = relationship("PostModel", back_populates="comments")

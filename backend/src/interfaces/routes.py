@@ -4,7 +4,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from uuid import UUID
 
-from backend.presentation.schemas import (
+from backend.src.interfaces.schemas import (
     PostCreateRequest, 
     PostResponse, 
     CommentCreateRequest, 
@@ -13,25 +13,30 @@ from backend.presentation.schemas import (
     UploadIntentRequest,
     UploadIntentResponse
 )
-from backend.src.infrastructure.database import get_db
+from backend.src.infrastructure.database import get_db, get_storage
 from backend.src.infrastructure.models import PostModel, CommentModel, UserModel
-from backend.infrastructure.s3_service import S3CloudService
-from backend.domain.entities import PostStatus
-from backend.presentation.auth import get_current_user
+from backend.src.domain.repositories import StorageRepository
+from backend.src.domain.entities import PostStatus
+from backend.src.interfaces.auth import get_current_user
 from backend.src.application.use_cases import GetPostDetailUseCase, AddCommentUseCase
+from backend.src.infrastructure.repositories_impl import PostRepositorySQLAlchemy
+from backend.src.infrastructure.utils.time_service import TimeService
 
 router = APIRouter(prefix="/posts", tags=["Kanban Posts B2B"])
 
 @router.post("/upload-intent", response_model=UploadIntentResponse, status_code=201)
-async def create_upload_intent(request: UploadIntentRequest, db: AsyncSession = Depends(get_db)):
+async def create_upload_intent(
+    request: UploadIntentRequest, 
+    db: AsyncSession = Depends(get_db),
+    storage: StorageRepository = Depends(get_storage)
+):
     """
-    RFC 2119: Emissão Efêmera da Pre-signed URL para arquitetura Cloud-first AWS S3.
+    RFC 2119: Emissão Efêmera da Pre-signed URL para arquitetura Cloud-first.
     A API interceptará a solicitação de intenção de Upload do Canvas, 
     sobrescreverá o nome falho para um UUID v4 B2B e persistirá a casca no DB 
     como 'PENDING_UPLOAD'.
     """
-    s3_service = S3CloudService()
-    presigned = s3_service.generate_upload_url(
+    presigned = storage.generate_upload_url(
         file_name=request.filename, 
         file_type=request.content_type
     )
@@ -39,7 +44,8 @@ async def create_upload_intent(request: UploadIntentRequest, db: AsyncSession = 
     new_post = PostModel(
         calendar_id=request.calendar_id,
         media_url=presigned["file_key"],
-        status=PostStatus.PENDING_UPLOAD
+        status=PostStatus.PENDING_UPLOAD,
+        created_at=TimeService.get_now()
     )
     db.add(new_post)
     await db.commit()
@@ -61,26 +67,25 @@ async def create_post(
     """
     new_post = PostModel(
         calendar_id=request.calendar_id,
-        media_url=request.media_url
+        media_url=request.media_url,
+        created_at=TimeService.get_now()
     )
     db.add(new_post)
     await db.commit()
     await db.refresh(new_post)
     return new_post
 
-@router.get("/{post_id}", response_model=PostDetailResponse)
+@router.get("/{post_id}", response_model=PostDetailResponse, responses={404: {"description": "Post não localizado"}})
 async def get_post(post_id: UUID, db: AsyncSession = Depends(get_db)):
     """
-    Obtém a mídia delegando ao Caso de Uso (Application Layer)
+    Obtém a mídia delegando ao Caso de Uso (Application Layer) via Repository.
+    Erros de domínio (404) são capturados pelo Exception Handler Global.
     """
-    use_case = GetPostDetailUseCase(db)
-    post = await use_case.execute(post_id)
-    
-    if not post:
-        raise HTTPException(status_code=404, detail="Regra Domain: Postagem inválida ou apagada pelo Tenant B2B.")
-    return post
+    repo = PostRepositorySQLAlchemy(db)
+    use_case = GetPostDetailUseCase(repo)
+    return await use_case.execute(post_id)
 
-@router.post("/{post_id}/comments", response_model=CommentResponse, status_code=201)
+@router.post("/{post_id}/comments", response_model=CommentResponse, status_code=201, responses={404: {"description": "Post não localizado"}, 400: {"description": "Coordenadas inválidas"}})
 async def add_visual_pin_comment(
     post_id: UUID, 
     request: CommentCreateRequest, 
@@ -89,20 +94,18 @@ async def add_visual_pin_comment(
 ):
     """
     Registra fisicamente o Pin Visual via Caso de Uso.
-    O Pydantic (Schema) garantirá silenciosamente que coord_x e coord_y nunca saiam de 0% a 100%.
+    O Exception Handler Global traduz erros de domínio em respostas HTTP limpas.
     """
-    # Valida se a mídia mãe (post) existe
-    post_result = await db.execute(select(PostModel).where(PostModel.id == post_id))
-    if not post_result.scalars().first():
-        raise HTTPException(status_code=404, detail="Não é possível transfixar Pin. Post não localizado.")
+    # Primeiro garantimos que o post existe antes de processar lógica de domínio complexa
+    repo = PostRepositorySQLAlchemy(db)
+    use_case_detail = GetPostDetailUseCase(repo)
+    await use_case_detail.execute(post_id) # Lança 404 se não existir via Global Handler
         
-    use_case = AddCommentUseCase(db)
-    new_comment = await use_case.execute(
+    use_case = AddCommentUseCase(repo)
+    return await use_case.execute(
         post_id=post_id,
         user_id=request.user_id,
         content=request.content,
         coord_x=request.coord_x,
         coord_y=request.coord_y
     )
-    
-    return new_comment

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
 from uuid import UUID
-from backend.domain.entities import PostStatus
+from backend.src.domain.entities import PostStatus
 from typing import Optional, List
 
 # ===============================================
