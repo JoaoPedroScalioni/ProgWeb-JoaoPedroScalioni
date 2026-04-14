@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs
 import uuid
-from backend.src.domain.entities import UserRole, PostStatus
+from src.domain.entities import UserRole, PostStatus
 
 # Clean Architecture: Herança obrigatória da classe AsyncAttrs para compatibilidade Async/Await do FastAPI
 Base = declarative_base(cls=AsyncAttrs)

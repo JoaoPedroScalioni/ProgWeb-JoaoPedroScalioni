@@ -1,6 +1,6 @@
 from datetime import datetime
 import pytz
-from backend.src.infrastructure.config import settings
+from src.infrastructure.config import settings
 
 class TimeService:
     """Serviço centralizado para gestão de fuso horário America/Sao_Paulo (GMT-3)"""
@@ -10,6 +10,11 @@ class TimeService:
         """Retorna o horário atual injetado com o fuso horário configurado no settings"""
         tz = pytz.timezone(settings.TIMEZONE)
         return datetime.now(tz)
+
+    @staticmethod
+    def get_now_br() -> datetime:
+        """Alias para get_now() enfatizando o fuso horário Brasil/SP para storytelling de testes"""
+        return TimeService.get_now()
 
     @staticmethod
     def to_local(dt: datetime) -> datetime:

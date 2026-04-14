@@ -2,9 +2,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from uuid import UUID
-from backend.src.domain.repositories import PostRepository
-from backend.src.infrastructure.models import PostModel, CommentModel
-from backend.src.domain.entities import PostEntity, CommentEntity
+from src.domain.repositories import PostRepository
+from src.infrastructure.models import PostModel, CommentModel
+from src.domain.entities import PostEntity, CommentEntity
 
 class PostRepositorySQLAlchemy(PostRepository):
     def __init__(self, session: AsyncSession):

@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 import pytz
-from backend.src.infrastructure.utils.time_service import TimeService
+from src.infrastructure.utils.time_service import TimeService
 
 def test_time_service_returns_sao_paulo_timezone():
     """Valida se o TimeService está injetando o fuso correto de SP"""

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
-from backend.src.domain.entities import PostEntity, CommentEntity
+from src.domain.entities import PostEntity, CommentEntity
 
 class PostRepository(ABC):
     @abstractmethod

@@ -16,23 +16,23 @@ class PostStatus(Enum):
     REJEITADO = "REJEITADO"
 
 class Coordinate(BaseModel):
-    x: float
-    y: float
+    x: float = Field(..., ge=0.0, le=100.0, description="Posição horizontal (0-100%)", example=50.0)
+    y: float = Field(..., ge=0.0, le=100.0, description="Posição vertical (0-100%)", example=50.0)
 
 class User(BaseModel):
-    id: UUID
-    name: str
-    email: str
-    password_hash: str
-    role: UserRole
+    id: UUID = Field(..., description="ID Identificador do Usuário")
+    name: str = Field(..., description="Nome completo do colaborador ou cliente", example="João Pedro")
+    email: str = Field(..., description="E-mail corporativo", example="joao@elevva.com")
+    password_hash: str = Field(..., description="Senha criptografada (argon2/bcrypt)")
+    role: UserRole = Field(..., description="Papel no sistema (Agência ou Cliente)")
 
 class CommentEntity(BaseModel):
     id: UUID = Field(..., description="ID Único Universal do Comentário")
     post_id: UUID = Field(..., description="Vínculo com a mídia original")
     user_id: UUID = Field(..., description="Autor do comentário")
     content: str = Field(..., description="Texto do feedback visual", example="Ajustar brilho no frame 02")
-    coord_x: float = Field(..., description="Posição X (0-100) no Canvas", example=45.5)
-    coord_y: float = Field(..., description="Posição Y (0-100) no Canvas", example=78.2)
+    coord_x: float = Field(..., ge=0.0, le=100.0, description="Posição X (0-100) no Canvas", example=45.5)
+    coord_y: float = Field(..., ge=0.0, le=100.0, description="Posição Y (0-100) no Canvas", example=78.2)
     created_at: Optional[datetime] = Field(None, description="Data de criação no fuso de SP")
 
 class PostEntity(BaseModel):

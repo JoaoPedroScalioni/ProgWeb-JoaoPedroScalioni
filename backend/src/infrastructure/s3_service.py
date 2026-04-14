@@ -2,7 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 from botocore.config import Config
 from uuid import uuid4
-from backend.src.infrastructure.config import settings
+from src.infrastructure.config import settings
 
 class S3CloudService:
     """Implementa o Adaptador concreto para Boto3 de emissões S3 Seguras."""

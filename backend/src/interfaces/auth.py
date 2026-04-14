@@ -3,9 +3,9 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from backend.src.infrastructure.database import get_db
-from backend.src.infrastructure.models import UserModel
-from backend.src.infrastructure.security import PasswordHasher, SecurityService
+from src.infrastructure.database import get_db
+from src.infrastructure.models import UserModel
+from src.infrastructure.security import PasswordHasher, SecurityService
 
 router = APIRouter(prefix="/auth", tags=["Security B2B - Auth Login"])
 

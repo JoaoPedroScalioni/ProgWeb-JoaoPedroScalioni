@@ -28,5 +28,8 @@ COPY . .
 # 7. Expõe a porta que o FastAPI vai usar
 EXPOSE 8000
 
-# 8. Comando corrigido para mapear a pasta 'backend' da Clean Architecture
-CMD ["uvicorn", "backend.presentation.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# 8. Define o PYTHONPATH para permitir imports relativos à pasta 'backend'
+ENV PYTHONPATH=/app/backend
+
+# 9. Comando atualizado para a estrutura Clean Architecture consolidada
+CMD ["uvicorn", "src.interfaces.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

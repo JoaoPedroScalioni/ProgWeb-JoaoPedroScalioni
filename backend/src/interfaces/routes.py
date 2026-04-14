@@ -4,7 +4,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from uuid import UUID
 
-from backend.src.interfaces.schemas import (
+from src.interfaces.schemas import (
     PostCreateRequest, 
     PostResponse, 
     CommentCreateRequest, 
@@ -13,14 +13,14 @@ from backend.src.interfaces.schemas import (
     UploadIntentRequest,
     UploadIntentResponse
 )
-from backend.src.infrastructure.database import get_db, get_storage
-from backend.src.infrastructure.models import PostModel, CommentModel, UserModel
-from backend.src.domain.repositories import StorageRepository
-from backend.src.domain.entities import PostStatus
-from backend.src.interfaces.auth import get_current_user
-from backend.src.application.use_cases import GetPostDetailUseCase, AddCommentUseCase
-from backend.src.infrastructure.repositories_impl import PostRepositorySQLAlchemy
-from backend.src.infrastructure.utils.time_service import TimeService
+from src.infrastructure.database import get_db, get_storage
+from src.infrastructure.models import PostModel, CommentModel, UserModel
+from src.domain.repositories import StorageRepository
+from src.domain.entities import PostStatus
+from src.interfaces.auth import get_current_user
+from src.application.use_cases import GetPostDetailUseCase, AddCommentUseCase
+from src.infrastructure.repositories_impl import PostRepositorySQLAlchemy
+from src.infrastructure.utils.time_service import TimeService
 
 router = APIRouter(prefix="/posts", tags=["Kanban Posts B2B"])
 
@@ -101,7 +101,7 @@ async def add_visual_pin_comment(
     use_case_detail = GetPostDetailUseCase(repo)
     await use_case_detail.execute(post_id) # Lança 404 se não existir via Global Handler
         
-    use_case = AddCommentUseCase(repo)
+    use_case = AddCommentUseCase(repo, TimeService())
     return await use_case.execute(
         post_id=post_id,
         user_id=request.user_id,

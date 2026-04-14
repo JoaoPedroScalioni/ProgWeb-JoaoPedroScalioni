@@ -4,9 +4,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 # Correções de importação baseadas na estrutura atual do Elevva
-from backend.src.infrastructure.models import Base
-from backend.src.infrastructure.database import get_db
-from backend.src.interfaces.main import app
+from src.infrastructure.models import Base
+from src.infrastructure.database import get_db
+from src.interfaces.main import app
 
 # URL do banco de teste isolado (criado agora para segurança)
 TEST_DATABASE_URL = "postgresql+asyncpg://elevva_su:elevva_secure_password@db:5432/elevva_test"

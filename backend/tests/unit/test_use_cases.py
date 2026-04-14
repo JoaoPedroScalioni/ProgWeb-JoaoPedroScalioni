@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock
 from uuid import uuid4
-from backend.src.application.use_cases import GetPostDetailUseCase, AddCommentUseCase
-from backend.src.domain.entities import PostEntity, PostStatus
+from src.application.use_cases import GetPostDetailUseCase, AddCommentUseCase
+from src.domain.entities import PostEntity, PostStatus
 
 @pytest.mark.asyncio
 async def test_get_post_detail_success():
@@ -44,21 +44,25 @@ async def test_get_post_not_found():
 async def test_add_comment_success():
     # Arrange
     mock_repo = AsyncMock()
+    mock_time = MagicMock()
+    mock_time.get_now_br.return_value = "2026-04-14T17:00:00-03:00"
+    
     post_id = uuid4()
     user_id = uuid4()
     comment_content = "Corrigir cor do botão"
     
-    from backend.src.domain.entities import CommentEntity
+    from src.domain.entities import CommentEntity
     expected_comment = CommentEntity(
         id=uuid4(),
         post_id=post_id,
         user_id=user_id,
         content=comment_content,
         coord_x=50.5,
-        coord_y=60.2
+        coord_y=60.2,
+        created_at="2026-04-14T17:00:00-03:00"
     )
     mock_repo.save_comment.return_value = expected_comment
-    use_case = AddCommentUseCase(mock_repo)
+    use_case = AddCommentUseCase(mock_repo, mock_time)
 
     # Act
     result = await use_case.execute(
@@ -78,10 +82,12 @@ async def test_add_comment_success():
 async def test_add_comment_negative_coordinates():
     # Arrange
     mock_repo = AsyncMock()
-    use_case = AddCommentUseCase(mock_repo)
+    mock_time = MagicMock()
+    use_case = AddCommentUseCase(mock_repo, mock_time)
 
     # Act & Assert
-    with pytest.raises(ValueError, match="coordenadas do Pin não podem ser negativas"):
+    from src.domain.exceptions import InvalidCoordinateError
+    with pytest.raises(InvalidCoordinateError):
         await use_case.execute(
             post_id=uuid4(),
             user_id=uuid4(),

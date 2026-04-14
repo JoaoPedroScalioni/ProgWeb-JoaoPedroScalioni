@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from backend.src.infrastructure.config import settings
-from backend.src.infrastructure.storage_impl import S3StorageRepository
+from src.infrastructure.config import settings
+from src.infrastructure.storage_impl import S3StorageRepository
 
 # Engine Assíncrona para Alta Escala (Não trava o Servidor Web enquanto o Banco processa)
 engine = create_async_engine(settings.DATABASE_URL, echo=False)

@@ -1,5 +1,5 @@
 import pytest
-from backend.src.infrastructure.security import SecurityService, PasswordHasher
+from src.infrastructure.security import SecurityService, PasswordHasher
 from uuid import uuid4
 
 def test_password_hashing():

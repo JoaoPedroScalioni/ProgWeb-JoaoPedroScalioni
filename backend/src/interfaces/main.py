@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.src.interfaces.routes import router
-from backend.src.interfaces.auth import router as auth_router
-from backend.src.domain.exceptions import DomainException, PostNotFoundError, InvalidCoordinateError
+from src.interfaces.routes import router
+from src.interfaces.auth import router as auth_router
+from src.domain.exceptions import DomainException, PostNotFoundError, InvalidCoordinateError
 from fastapi import Request
 from fastapi.responses import JSONResponse
 import logging
