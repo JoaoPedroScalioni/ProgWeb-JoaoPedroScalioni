@@ -1,8 +1,9 @@
 import pytest
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 from src.application.use_cases import GetPostDetailUseCase, AddCommentUseCase
 from src.domain.entities import PostEntity, PostStatus
+from src.domain.exceptions import PostNotFoundError
 
 @pytest.mark.asyncio
 async def test_get_post_detail_success():
@@ -34,11 +35,9 @@ async def test_get_post_not_found():
     mock_repo.get_by_id.return_value = None
     use_case = GetPostDetailUseCase(mock_repo)
 
-    # Act
-    result = await use_case.execute(uuid4())
-
-    # Assert
-    assert result is None
+    # Act & Assert
+    with pytest.raises(PostNotFoundError):
+        await use_case.execute(uuid4())
 
 @pytest.mark.asyncio
 async def test_add_comment_success():

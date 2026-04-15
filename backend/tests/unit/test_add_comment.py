@@ -37,7 +37,7 @@ async def test_add_comment_success():
     assert result.post_id == post_id
     assert result.content == content
     assert result.coord_x == coord_x
-    assert result.created_at == "2026-04-14T17:00:00-03:00"
+    assert result.created_at.isoformat() == "2026-04-14T17:00:00-03:00"
     mock_repo.save_comment.assert_called_once()
 
 @pytest.mark.asyncio
